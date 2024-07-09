@@ -40,5 +40,5 @@ def evaluate(net, dataloader):
     net.train() #if need to set the model back to training mode
     return dice_score / max(num_val_batches, 1)
 
-accuracy = evaluate(model, test_loader)
+accuracy = evaluate(model, val_loader)
 print(accuracy)
