@@ -9,9 +9,19 @@ from torch.utils.data import random_split
 from data_loading import CustomDataset
 from unet_sigmoid import UNet
 
+'''
+#clone dataset
+!git init
+!git remote add -f origin https://github.com/xinhuolin/TEM-ImageNet-v1.3.git
+!git config core.sparseCheckout true
+!echo "circularMask" >> .git/info/sparse-checkout
+!echo "image" >> .git/info/sparse-checkout
+!git pull origin master
+'''
 
-image_dir = 'image'  # Add correct path to the image directory
-mask_dir = 'circularMask'    # Add correct path to the mask directory
+# Add correct path to the image directory and mask directory
+image_dir = 'image' 
+mask_dir = 'circularMask'   
 
 def train_model(model, epochs=10, save_path='unet_model.pth'):
     n_train = len(train_set)
