@@ -52,7 +52,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-dataset = CustomDataset(img_dir=image_dir, mask_dir=mask_dir)
+dataset = CustomDataset(img_dir=image_dir, mask_dir=mask_dir, transform)
 train_set, val_set = random_split(dataset, [0.75, 0.25], generator = torch.Generator().manual_seed(42))
 train_loader = DataLoader(train_set, batch_size=4, shuffle=True)
 val_loader = DataLoader(val_set, shuffle=False)
