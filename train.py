@@ -9,27 +9,17 @@ from torch.utils.data import random_split
 from data_loading import CustomDataset
 from unet_sigmoid import UNet
 
-'''
-#clone dataset
-!git init
-!git remote add -f origin https://github.com/xinhuolin/TEM-ImageNet-v1.3.git
-!git config core.sparseCheckout true
-!echo "circularMask" >> .git/info/sparse-checkout
-!echo "image" >> .git/info/sparse-checkout
-!git pull origin master
-'''
 
-# Add correct path to the image directory and mask directory
-image_dir = 'image' 
-mask_dir = 'circularMask'   
+image_dir = 'image'  # Add correct path to the image directory
+mask_dir = 'circularMask'    # Add correct path to the mask directory
 
-def train_model(model, epochs=10, save_path='unet_model.pth'):
-    n_train = len(train_set)
+def train_model(net, dataloader, criterion, optimizer, epochs=10,save_path='unet_model.pth'):
+    n_train = len(dataloader)
     for epoch in range(1, epochs + 1):
-        model.train()
+        net.train()
         epoch_loss = 0
         with tqdm(total=n_train, desc=f'Epoch {epoch}/{epochs}', unit='img') as pbar:
-            for batch in train_loader:
+            for batch in dataloader:
                 images, masks = batch['image'], batch['mask']
 
                 # Ensure images and masks are on the correct device
@@ -37,7 +27,7 @@ def train_model(model, epochs=10, save_path='unet_model.pth'):
                 masks = masks.to(device='cuda', dtype=torch.float32)
 
                 # Forward pass
-                outputs = model(images)
+                outputs = net(images)
 
                 # Compute loss
                 loss = criterion(outputs, masks)
@@ -51,26 +41,8 @@ def train_model(model, epochs=10, save_path='unet_model.pth'):
                 pbar.set_postfix(**{'loss (batch)': loss.item()})
                 pbar.update(images.shape[0])
 
-        print(f'Epoch {epoch}/{epochs} completed with avg loss: {epoch_loss/len(train_loader):.4f}')
+        print(f'Epoch {epoch}/{epochs} completed with avg loss: {epoch_loss/len(dataloader):.4f}')
 
     # Save the model weights
-    torch.save(model.state_dict(), save_path)
+    torch.save(net.state_dict(), save_path)
     print(f'Model saved to {save_path}')
-
-# Define transformations
-transform = transforms.Compose([
-    transforms.ToTensor()
-])
-
-dataset = CustomDataset(img_dir=image_dir, mask_dir=mask_dir, transform=transform)
-train_set, val_set = random_split(dataset, [0.75, 0.25], generator = torch.Generator().manual_seed(42))
-train_loader = DataLoader(train_set, batch_size=4, shuffle=True)
-val_loader = DataLoader(val_set, shuffle=False)
-
-# Initialize model, criterion, and optimizer
-model = UNet(colordim=1).cuda()
-criterion = nn.MSELoss() #nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-# Train the model and save weights
-train_model(model, epochs=2, save_path='unet_MSE_loss.pth')
