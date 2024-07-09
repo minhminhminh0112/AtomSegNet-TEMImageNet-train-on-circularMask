@@ -9,10 +9,6 @@ from torch.utils.data import random_split
 from data_loading import CustomDataset
 from unet_sigmoid import UNet
 
-
-image_dir = 'image'  # Add correct path to the image directory
-mask_dir = 'circularMask'    # Add correct path to the mask directory
-
 def train_model(net, dataloader, criterion, optimizer, epochs=10,save_path='unet_model.pth'):
     n_train = len(dataloader)
     for epoch in range(1, epochs + 1):
